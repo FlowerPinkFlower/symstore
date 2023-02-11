@@ -1,0 +1,244 @@
+//namespace App\Controller;
+
+// use App\Entity\Produits;
+// use App\Repository\OrderRepository;
+// use App\Repository\ProduitsRepository;
+// // use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+// use App\Repository\CategoriesRepository;
+// use Doctrine\ORM\EntityManagerInterface;
+// use Symfony\Component\HttpFoundation\Request;
+// use Symfony\Component\HttpFoundation\Response;
+// use Symfony\Component\Routing\Annotation\Route;
+// use Symfony\Component\HttpFoundation\JsonResponse;
+// use Symfony\Component\Serializer\SerializerInterface;
+// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+
+//     /**
+//      * @Route("/api")
+//      */
+// class ApiProductController extends AbstractController
+// {
+//     /**
+//      * @Route("/product", name="app_api_product", methods={"GET"})
+//      */
+//     public function index(ProduitsRepository $prodRepo, SerializerInterface $serializer)
+//     {
+       
+
+//         //js_encode permet de faire l'encodage des données
+        
+//         //json_encoder ne sait traiter autre chose qu'un tableau
+//         //json_encoder ne sait pas utiliser les gettes
+//         //$products[0]['name'] ne marche pas car attribut name en privé
+//         //tous les attributs sont privés et json_encode n'est pas assez intelligent pour pouvoir se dire qu'ils n'arrivent pas a accèder aux attributs et de voir s'il n'y a pas des getters
+        
+
+//         //Solution: normaliser les données, en utilisant un normalizer, qui est assez intelligent pour se dire qd'utiliser des getters pour pouvoir récupérer les données.
+//         //On va demander a symfony de nous envoyer un normalizerInterface.
+//         //Entre la récupération des données et l'envoi des données à json pour qu'il puisse faire la normalization.
+//         //On va normalizer nos données. Donc utilisé le normalizer pour faire la récupération propres des donénes et stocker ca dans un tableau associatif.
+
+//         //2après avoir ajouter les annotations dans produits entity, on va indiquer au normalizer d'utiliser le groupe prod read
+//         //null correspond au deuxième param qui permet de mettre des param un peu spécifique
+//         //troisième param, placer un tableau avec l'attribut groups et on va indiquer le nom du groupe avec lequel on veut travailler
+       
+//         //SOLUTION 1
+//         /**************************************************/
+        
+//         //NormalizerInterface+json_encode()
+//         // $prodsNormalized = $normalizer->normalize($prods, null, ['groups' => 'prods:read']);  //normaliser nos produits
+        
+//         // $jsonData = json_encode($prodsNormalized);
+
+//         //affichage de nos prodtsNormalized
+//         // dd($prodsNormalized, $jsonData,);
+//         /*************************************************/
+        
+//         //Une erreur survient souvent quand on demande au normaliser des données qui viennent de la BDD. 
+//         //Pourquoi? La référence circulaire = serpent qui se mrd la queue.
+//         //Le normaliser tout ce qu'il cherche quand il rencontre un pbjet c'est de l'interpreter et de le convertir en tableau associatif.
+//         //Qu'est ce qu'il se passe au niveau de nos entités? Il y a un pdt, id, nom, qty, prix et une catégorie.
+//         //On a un objetc de type product, un product est relié à un object catégorie, dans catégorie il y a un object product = boucle sans fin.
+//         //Symfony est capable de detecter ce genre de pb donc symfony nous averti avant que le serveur ne se plante.
+//         //Pour éviter d'avoir une référence circulaire on va demander à notre normalizer pour la classe product de récupérer le nom, l'id, la qty, etc sauf categorie.
+//         //Comment faire pour récupérer la catégorie?
+//         //On va d'abord marquer tous les champs tout en ignonrant le champ catégorie. Ce qui va permettre lors de la normalisation d'ignorer caté.
+        
+//         //3On va réaliser dans une vraie réponse http afin que le nav récupère tout ca et qu'il affiche correctement les données et les répsentent correctement à l'application qui est en train de tourner dans le nav.
+//         //renvoi de jsonData proprement à l'application qui nous a demandé ces données.
+//         //Créer un object response est dans les param de cette reponse on va indiquer les datas que l'on veut envoyer.
+//         //on doit indiquer le code retour que l'on veut retourner a notrre appli. Comme tout c'est bien passé, code 200
+//         //On doit indiquer dans l'en-tête de la requête par lintermédiaire de l'attribut Content-Type que l'on lui retourne des données au format json. 
+
+//         /****Code copier, correspond au meme ligne plus bas****/
+//         // $reponse = new Response($jsonData, 200, ["Content-Type" =>"application/json"] ); //affichage du prix, qty, name, id sans la catégorie
+//         // return $reponse;
+//         /*******************************************************/
+//         //symfony fourni un touril qui s'appel le serializer qui s'occupe de faire automatiquement la noramilization et l'encodage en json des données.
+//         //On change les param dans la class index noramilizer>serializer
+
+//         //On va pouvoir récupérer directement dans notre jsonData le résultat du traitement par le serializer qui a une instruction serialize.
+//         //On va lui idnquer les datas qu'il va devoir serializer tuoojours le sproduits récupérer dnas la BDD. Ensuite lui dire que les données en sorti soient en Jsonet lui idiquer le groupe des attributs qu'il va devir utiliser pour fair ela normalisation de nos données.
+    
+//         //SOLUTION 2
+//         /**************************************************/
+//        //serializer remplace le normalizer + json_encode()
+//         // $jsonData = $serializer->serialize($prods, 'json', ['groups' => 'prods:read']);
+    
+//         // $reponse = new Response($jsonData, 200, ["Content-Type" =>"application/json"] ); //affichage du prix, qty, name, id sans la catégorie
+        
+
+//          //SOLUTION 3 - Simplification en 1 ligne de la constructionde la réponse
+//         /**************************************************/
+//         // Au niveau du controlleur donc $this, il existe un object qui s'appel json_response, il va nous appeler le serializer qui derrière va appeler le normalizer et va appeler le js_encode
+//         //Il va réaliser toutes les opérations en une seule étape.
+//         //On lui envoi nos Json data, on va indiquer le type de reponse que l'on veut et derrière on va mettre true (que l'on a rien a indiquer, on force la réponse en json)
+//         //Qsuans on uyilise le JsonResponse, on a pas besoin de spécifier que l'on va retourner du json car c'est lui qui va générer la réponse auomatiquement qui va rajouter de lui meme le content-type dapplciation json dans l'entete de la réponse quil va faire.
+//         //Il faut importer la classe jsonResponse.
+
+//         // $reponse = new JsonResponse ($jsonData, 200, [], true);
+//         // return $reponse;
+
+//         //SOLUTION 3 bis - Simplification
+//         /**************************************************/
+//         //On va appeler directement au niveau de notre controlleur, Dnas notre controlleur il y a une méthode qui s'appel json
+//         //al variable prod sert faire la requete auprès de la BDD. 
+//         $prods= $prodRepo->findAll();
+//         $reponse = $this->json($prods, 200, [], ['groups' => 'prods:read']);
+
+//         return $reponse;
+
+//         //SOLUTION 4
+//         /**************************************************/
+//         //La variable prod sert faire la requete auprès de la BDD. 
+//         //au niveau de l'instruction $thiq->json, on peut juste prendre $prodRepo.
+//         //On peut récuprer toute la variable , l'incrémenter à return et retourner la réponse.
+//         //la première api se résume à l'excution d'une instruction.
+        
+//         // return $this->json($prodRepo->findAll(), 200, [], ['groups' => 'prods:read']);
+        
+//         //Maintenant il faut récupérer la catégorie à partir d'un produit sans créer de référence circulaire:
+//         //On a notre classe de produit dans lequel on a dejà défini des groupes, on a notre classe de categorie qui contient attribut id, name, description, product.
+//         //Si on veut avoir les caté, il faut dire pour notre classe produit, dans le groupe tu nous rajoutes les caté. Seulement, il y aura une référence circulaire.
+//         //Il faut aller dans la catégorie et spécifier quels sont les groupes/attributs que l'on veut rajouter au groupe prods:reads.
+
+//         }
+        
+//         /****************************************************************************************************/
+//         //EXERCICE
+//         //créer une API qui va permettre de récuperer toutes les commandes et les lignes de details de commande.
+//         // /order pour pouvoir récuperer la liste des commandes.    
+//         /****************************************************************************************************/
+//     /**
+//      * @Route("/order", name="api_order", methods={"GET"})
+//      */
+//     public function getOrders(OrderRepository $orderRepo){
+//         return $this->json($orderRepo->findAll(), 200, [], ['groups'=>'orders:read']);
+//     }
+
+
+//     // Comment on va ajouter un nouveau produit dans notre BDD.
+//     //Envoyer des données dans une API 
+//     //Principe de fonctionnement
+//     /**********************************************************/
+//     //1) l'utilisateur à rempli un formulaire
+//     //2) le client envoie des données au format json avec un POST HTTP
+//     //3) l'API doit faire une opération de deserialisation des données de façon à partir du Json et a récuprer un object
+//     //4) L'API va enregistrer les données dans la BDD
+//     //5) Envoi une réponse au client pour lui dire que tout c'est bien passé ou qu'il y a eu un pb
+//     //Le code 201 correspond aux codes standard de http -> requête traitée avec succès et création d'un document
+//     //La réponse que l'on envoi au client c'est une réponse qui va être formaté au format Json comme ca il n'y a qu'un seul format d'échange que ce soit pour les info, les données ou les comptes rendus de requête.
+//     //Comment ca va se traduire.
+//     //Au niv du controlleur on va creer une nouvelle méthode
+//     //De quoi va ton avoir besoin pour travailler = request (dabord récuperer les données. On va récupérer les infodans la requête que notre serveur à reçu)
+//     //1er chose que l'on a besoin, c'ets la requeête, on va en extraire les données.
+//     //2eme, on va récupérer les données qui sont au format json
+//     //Exttraction des données -> getContent sur la requête $req
+//     //3eme, désiarilisaation des données.
+
+
+//     //Un soucis va apparaitre au niveau de l'id de la categorie car on en connait que son nom. Alors que si on veut initialiser notre object product a besoin de l'id categorie comme c'est indiqué dans la BDD onglet produits
+//     //Avant d'aller enregistrer notre pdt dnas la BDD, il va falloir mettre a jour sa categorie.
+//     //Il nous faut donc l'id de la categorie pour initialiser l'attribut categorie id du produit.
+//     //Il faut donc récupérer l'id de la categorie à partir de son nom.
+
+
+//     /**
+//      * @Route("/product/new", name="api_newProd", methods={"POST"})
+//      */
+//     public function addProduct (Request $req, SerializerInterface $serializer, CategoriesRepository $catRepo, EntityManagerInterface $em){
+//         $jsonData = $req->getContent();
+//         $prod = $serializer->deserialize ($jsonData, Produits::class, 'json');
+        
+
+
+//         //Comment récupérer l'id de la catégorie?
+//         //categorieRepository->si j'ai le nom de la caté, je vais faire une requête dans la BDD et lui demander de retourner la cate qui a le nom qui a été reçu en param dans le pdt
+//         //$cate = à $pproduct getCategorie == je récupère la cate qui est à l'intérieur de mon prdt.
+//         //getCat = Retourner la categorie, aller demander le repo de cate de retourner la cate (findOneBy) car doit retourner qu'un seul enregistrement et ensuite lui passer en param qu'el est l'attribut que l'on recherche dans la bdd (tab asso).
+//         //On va lui dire je veux faire la recherche par rapport à l'attribut name et l'attribut name c'est l'attribut que l'on a dans le produit que j'ai recu en param -> prod deserialisé
+//         //On récupérer le nom récupéré ds le $cat au dessus et je lui dis getName de la categorie récup au dessus.
+//         /***************************************/
+
+//        $cat = $prod->getCategorie();
+//        $getCat = $catRepo->findOneBy(['name'=>$cat->getName()]);
+//        //dd($cat, $getCat);
+//        //Je récupérer bien un object de type cate, avec les infos du pdt.
+
+
+//        //Mettre à jours la catégorie dans produit
+//        /*****************************************/
+//        $prod->setCategorie($getCat);
+//     //    dd($prod);
+
+//        //Enregistre dans la bdd
+//        //Il faut un entityManager. Ne pas oublier de l'importer. Perister le pdt ds la bdd
+//        $em->persist($prod);
+//        $em->flush();
+
+
+//         //Envoie d'une réponse du produit à l'appli client qui nous a fiat la demande du nv prdt dans la bdd
+//         /***************************************************************************************************/
+//         //Return $this json. On va renvoyer une requpete au format json avec un code retour 201 (tout s'est bien passé)
+//         //On va retourner le pdt avec ses données.
+//         //On va lui dire que le prdt à bien était enregistrée dans la BDD 201
+//         //Pas d'entete a indiquer
+//         //On va luid ire d'utiliser le groupe read
+//         return $this->json($prod, 201, [], ['groups'=>'prods:read']);
+//         //Code retour 201 et le clt a bien recupérer notre code json et a bien récup son produit
+//         //Vérifier dans la bdd que le pdt est bien créer.
+//     }
+// }
+
+//Gérer les exceptions en mode PHP
+/********************************/
+//Utilisation du try catch
+//On va englober tout notre code dans un try
+//On va récuprer dans la catch l'exception qui s'appel NotEncodedValueException
+//Plutot que de laisser l'erreur aprtir sur le client, on va formater notre propre erreur que l'on aura pris soins de formater en json.
+//on doit donner comme 1er param à Json, c'est un tab associatif. Dans lequel on va placer les info que l'on veut retourner à l'utilisateur au niv de l'erreur
+//On va lui donner des info complémentaire, message, on va récup le mess que l'on a recu au niv de notre exception
+//400= c'est pour le N@v
+//Si le nom du produit n'est pas mis, lancement de la requete mais une erreur apparaît au moment de persister. Le nom product.name ne doit pas être null. Il ne faut pas envoyer ce genre d'info a l'utilisateur. Possibilité de hackage.
+//Pour que toutes les informations que l'on a recu soient correcte au niv de l'object que l'on recoit avant de l'inscrire dans la bdd, il faut valider les données reçu avant de persister.
+
+//Traitement des erreurs
+/***********************/
+Erreur de formatage json => entriane une exception NotEncodedValueException
+Solution avec un try catch
+
+Erreur sur les données reçu
+Solution validator 1(on va placer comme pour le controll du formulaire, on va utiliser des annotations assert au niveau des entités de notre projet)
+2 Faire appel un validator qui nous dira si c'est bon ou pas. Si c'est okay on persist les données, si c'est pas ok on va retournr un message d'erreur au client
+
+Assert entity name:
+On peut lui demander a ce que le champ nom ne doit pas etre blanc, il doit absolument avoir une valeur
+On peut lui dire que le nom d'un produit ai une longueur minim et max insert min et max
+Pour la quantité on veut que des nb positifs
+Il faut faire maintenant appel au validator. Il va valider que toutes les assertions soient bien vérifier au niv de notre classe product.
+On va demander à symfony de nous envoyer un validator
+Pour chaque insertion qui ne lui convient pas il nous renseignera ca dans un tableau. A la sorti du validator on va récupérer un tab avec les erreurs que va nous remonter le validator 
+$erros= Valider moi l'objet crod que j'ai récup dansla requete
+Si on a des erreurs (erro est un tab) cela veut dire que la longueur du tab est sup à zéro
+Si la long est dif de zéro donc pas aller plus loin et on va retourner l'erreur dans le tab associatif

@@ -1,0 +1,31 @@
+{% extends "base.html.twig" %}
+
+{% block title %}🥞Store Camomille🥞 Detail{% endblock %}
+    
+{% block body %}
+   <div class="container">
+        <h4 class="text-center"> Détail de la commande </h4>
+        <table class="table table-dark">
+            <thead>
+                <tr class="table-info">
+                <th class="text-center">Nom du produit</th>
+                <th class="text-center">Quantité</th>
+                <th class="text-center">Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            {% for ol in ols %}
+                <tr class="table-info">
+                    <td class="text-center">{{ol.product.name}}</td>
+                    <td class="text-center">{{ol.quantity}}</td>
+                    <td class="text-center">{{ol.total}}</td>
+                </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+        <a href="{{path('order_all')}}" class="btn btn-info">Retour</a>
+   </div>
+
+{% endblock %}

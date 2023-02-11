@@ -1,0 +1,24 @@
+{% extends 'base.html.twig'%}
+{% block title %}
+    🥞Store Camomille🥞: Ajouter une categorie
+{% endblock %}
+
+{% block body %}
+    {{form_start(formCate)}}
+
+    {{form_row(formCate.name,{"label":"Nom",'attr': { placeholder: "Entrez le nom de la catégorie" } } ) }}
+    
+    {{form_row(formCate.description,{"label":"Description",'attr': { placeholder: "Entrez la description de la catégorie" } } ) }}
+    <br>
+
+   {% if mode %}
+    <button type="submit" class="btn btn-primary">Modifier une categorie</button>
+
+   {% else %}
+    <button type="submit" class="btn btn-primary">Créer une categorie</button>
+
+   {% endif %}
+
+    {{form_end(formCate)}}
+
+{% endblock %}

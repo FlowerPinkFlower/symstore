@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🥞Store Camomille🥞: Panier{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    {% if cartDetails | length > 0 %}
+       <table class="table tbale-hover mt-4">
+            <thead>
+                <tr class="table-info">
+                    <th class="text-center">Produit</th>
+                    <th class="text-center">Quantité</th>
+                    <th class="text-center">Prix</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in cartDetails %}
+                <tr class="table-info">
+                    <td class="text-center">{{line.produit.name}}</td>
+                    <td class="text-center"> 
+                        <a href="{{path('qty_dec', {'idProd': line.produit.id} )}}" class="btn btn-warning btn-sm">-</a> 
+                        {{line.qty}}
+                        <a href="{{path('qty_up', {'idProd': line.produit.id} )}}" class="btn btn-warning btn-sm">+</a>
+                    </td>
+                  
+                    <td class="text-center">{{line.produit.getUnitPrice() * line.qty}}</td>
+                    <td class="text-center"> <a href="{{path('cart_del', {'idProd': line.produit.id} )}}" class="btn btn-danger btn-sm">Supprimer</a></td>
+                </tr>
+                    
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-infobox">
+                    <td colspan="2" class="text-end">Total</td>
+                    <td class="text-center"> {{ totalPanier | number_format(2, ',', '.')}} </td>
+                </tr>
+            </tfoot>
+       </table>  
+            <a href="#" class="btn btn-danger">Vider le panier</a>
+            <a href="{{ path('order_add', {'user': app.user.id} )}}" class="btn btn-success"> Passer commande</a>
+            
+    {% else %}
+        <h3 class="text-center mt-4" >Votre panier est vide</h3>
+         <a href="{{path('prod')}}" class="btn btn-info">Retour à la liste des produits</a>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} 🥞Store Camomille🥞 Commandes {% endblock %}
+
+{% block body %}
+    <h1 class="text-center">Liste des commandes</h1>
+    <div class="container">
+
+        <table class="table table-Dark">
+            <thead>
+                <tr class="table-info">
+                    <td class="text-center">Référence commande</td>
+                    <td class="text-center">Date</td>
+                    <td class="text-center">Nom du client</td>
+                    <td class="text-center">Montant de la commande</td>
+                    <td class="text-center"></td>
+                </tr>           
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr class="table-info">
+                        <td table="text-center"> {{order.refCde}}</td>
+                        <td table="text-center"> {{order.date | date ('d/m/y')}}</td>
+                        <td table="text-center"> {{order.customer.email}}</td>
+                        <td table="text-center"> {{order.total}}</td>
+                        <td table="text-center"> <a href="{{ path('order_detail', {'order': order.id}) }}" class="btn btn-warning">Détail</a></td>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{path('cart')}}" class="btn btn-info">Retour</a>
+    </div>
+{% endblock %}

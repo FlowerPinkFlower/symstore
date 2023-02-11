@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Ajouter une categorie
+{% endblock %}
+
+    {% block body %}
+              
+<h1>Liste des catégories</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="text-center" scope="col">Id Categorie</th>
+            <th class="text-center" scope="col">Nom catégorie</th>
+            <th class="text-center" scope="col">Description de la catégorie</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cate in categories %}
+            <tr>
+                <td class="text-center">{{ cate.id}}</td>
+                <td class="text-center">{{ cate.name}}</td>                     
+                <td class="text-center">{{ cate.description}}</td>                     
+            {% if is_granted('ROLE_ADMIN') %}
+                <td>
+                <a href="{{path('cate-edit', {'id': cate.id} )}}" class="btn btn-warning">Modifier une categorie</a>
+                <a href="{{path('cate-delete', {'id': cate.id} )}}" class="btn btn-danger">Supprimer une categorie</a>
+                </td>  
+            {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <a href="{{path('cate-new')}}" class"btn btn-success" >Ajouter une categorie</a>
+    {% endif %}
+
+    {% endblock %}  

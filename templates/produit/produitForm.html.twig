@@ -1,0 +1,25 @@
+{% extends 'base.html.twig'%}
+{% block title %}
+    🥞Store Camomille🥞: Ajouter un produit
+{% endblock %}
+
+{% block body %}
+    {{form_start(formProd)}}
+
+    {{form_row(formProd.name,{"label":"Nom",'attr': { placeholder: "Entrez le nom du produit" } } ) }}
+    {{form_row(formProd.categorie,{"label":"Catégorie"})}}
+    {{form_row(formProd.quantity,{"label":"Quantité",'attr': {placeholder: "Quantité de produit"} })}}
+    {{form_row(formProd.unit_price,{"label":"Prix Unitaire",'attr': {placeholder: "Prix unitaire du produit"} })}}
+    <br>
+
+   {% if mode %}
+    <button type="submit" class="btn btn-primary">Modifier un produit</button>
+
+   {% else %}
+    <button type="submit" class="btn btn-primary">Créer un produit</button>
+
+   {% endif %}
+
+    {{form_end(formProd)}}
+
+{% endblock %}

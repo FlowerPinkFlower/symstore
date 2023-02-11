@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🥞Camomille Store🥞{% endblock %}
+
+{% block body %}
+
+<h1>🥞Liste des produits chez Camomille Store🥞</h1>
+
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Id produit</th>
+            <th scope="col">Nom produit</th>
+            <th scope="col">Categorie</th>
+            <th scope="col">Prix unitaire</th>
+            <th scope="col">Quantité stock</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        {% for prod in produits %}
+            <tr>
+                <td>{{ prod.id}}</td>
+                <td>{{ prod.name}}</td>
+                <td>{{ prod.categorie.name}}</td>
+                <td>{{ prod.unitPrice}} €</td>
+                <td>{{ prod.quantity}}</td>     
+                     
+                <td>
+        {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{path('prod-edit', {'id': prod.id} )}}" class="btn btn-warning">Modifier un produit</a>
+                <a href="{{path('prod-delete', {'id': prod.id} )}}" class="btn btn-danger">Supprimer un produit</a>
+        
+                </td>  
+            </tr>
+            {% else %}
+                <a href="{{path ('cart_add', {'idProd': prod.id}) }}" class"btn btn-success" class="btn btn-warning">Ajouter au panier</a>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+ {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{path('prod-new')}}" class"btn btn-success" >Ajouter un produit</a>
+ {% endif %}
+
+{% endblock %}
+
+{# {% if is_granted('ROLE_ADMIN') %}
+    {% if mode %}
+        <button type="submit" class="btn btn-primary">Modifier un produit</button>
+   {% else %}
+        <button type="submit" class="btn btn-primary">Créer un produit</button>
+   {% endif %}
+
+{% else %}
+    <button type="submit" class="btn btn-primary">Ajouter au panier</button>
+{% endif %} #}
